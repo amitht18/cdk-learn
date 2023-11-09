@@ -28,24 +28,20 @@ export class CdkDemoStack extends cdk.Stack {
     sgForEC2.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'HTTP Access');
     sgForEC2.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.allTraffic());
     
-    const EC2Targets = []
-    for(let i = 0; i < 2; i++) {
-      const ec2Instance = new ec2.Instance(this, `EC2Instance${i+1}`, {
-        vpc,
-        instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
-        machineImage: new ec2.AmazonLinuxImage(),
-        securityGroup: sgForEC2,
-      });
-      ec2Instance.addUserData(`
-        #!/bin/bash
-        yum update -y
-        yum install httpd -y
-        service httpd start
-        chkconfig httpd on
-        echo "<h1>Hello World from EC2 Instance ${i+1} $(hostname -f)</h1>" > /var/www/html/index.html
-      `);
-      EC2Targets.push(new InstanceTarget(ec2Instance));
-    }
+    // const ec2Instance = new ec2.Instance(this, `EC2Instance`, {
+    //   vpc,
+    //   instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
+    //   machineImage: new ec2.AmazonLinuxImage(),
+    //   securityGroup: sgForEC2,
+    // });
+    // ec2Instance.addUserData(`
+    //   #!/bin/bash
+    //   yum update -y
+    //   yum install httpd -y
+    //   service httpd start
+    //   chkconfig httpd on
+    //   echo "<h1>Hello World from EC2 Instance $(hostname -f)</h1>" > /var/www/html/index.html
+    // `);
 
     const ALB = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
       vpc,
@@ -59,12 +55,36 @@ export class CdkDemoStack extends cdk.Stack {
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,
       targetType: elbv2.TargetType.INSTANCE,
-      targets: EC2Targets,
       protocolVersion: elbv2.ApplicationProtocolVersion.HTTP1,
     });
+    // targetGroup.addTarget(new InstanceTarget(ec2Instance))
     ALB.addListener('ALBListener', {
       port: 80,
       defaultTargetGroups: [targetGroup],
     })
+
+    const asg = new autoscaling.AutoScalingGroup(this, 'ASG', {
+      vpc,
+      launchTemplate: new ec2.LaunchTemplate(this, 'LaunchTemplate', {
+        instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
+        machineImage: new ec2.AmazonLinuxImage(),
+        securityGroup: sgForEC2,
+        userData: ec2.UserData.custom(`
+          #!/bin/bash
+          yum update -y
+          yum install httpd -y
+          service httpd start
+          chkconfig httpd on
+          echo "<h1>Hello World from ASG Instance $(hostname -f)</h1>" > /var/www/html/index.html
+          `),
+      }),
+      maxCapacity: 4,
+      minCapacity: 2,
+      desiredCapacity: 3,
+      healthCheck: autoscaling.HealthCheck.elb({
+        grace: cdk.Duration.seconds(5),
+      }),
+    })
+    asg.attachToApplicationTargetGroup(targetGroup)
   }
 }
