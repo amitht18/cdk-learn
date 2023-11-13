@@ -27,21 +27,6 @@ export class CdkDemoStack extends cdk.Stack {
     sgForEC2.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), 'SSH Access');
     sgForEC2.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'HTTP Access');
     sgForEC2.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.allTraffic());
-    
-    // const ec2Instance = new ec2.Instance(this, `EC2Instance`, {
-    //   vpc,
-    //   instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
-    //   machineImage: new ec2.AmazonLinuxImage(),
-    //   securityGroup: sgForEC2,
-    // });
-    // ec2Instance.addUserData(`
-    //   #!/bin/bash
-    //   yum update -y
-    //   yum install httpd -y
-    //   service httpd start
-    //   chkconfig httpd on
-    //   echo "<h1>Hello World from EC2 Instance $(hostname -f)</h1>" > /var/www/html/index.html
-    // `);
 
     const ALB = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
       vpc,
@@ -57,7 +42,6 @@ export class CdkDemoStack extends cdk.Stack {
       targetType: elbv2.TargetType.INSTANCE,
       protocolVersion: elbv2.ApplicationProtocolVersion.HTTP1,
     });
-    // targetGroup.addTarget(new InstanceTarget(ec2Instance))
     ALB.addListener('ALBListener', {
       port: 80,
       defaultTargetGroups: [targetGroup],
