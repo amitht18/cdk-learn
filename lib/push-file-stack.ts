@@ -31,5 +31,10 @@ export class S3DeployStaticAppStack extends cdk.Stack {
             sources: [s3deploy.Source.asset('./static-site')],
             destinationBucket: s3Bucket
         })
+
+        new cdk.CfnOutput(this, 'WebsiteURL', {
+            value: s3Bucket.bucketWebsiteUrl,
+            exportName: 'WebsiteURL',
+        })
     }
 }
