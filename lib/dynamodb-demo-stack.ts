@@ -1,4 +1,4 @@
-import { App, CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
+import { App, CfnOutput, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { AttributeType, TableClass, TableV2 } from 'aws-cdk-lib/aws-dynamodb'
 
 
@@ -11,7 +11,8 @@ export class DynamodbDemoStack extends Stack {
                 name: 'id',
                 type: AttributeType.STRING
             },
-            tableClass: TableClass.STANDARD
+            tableClass: TableClass.STANDARD,
+            removalPolicy: RemovalPolicy.DESTROY
         })
 
         new CfnOutput(this, 'DynamoDBDemoArn', {
