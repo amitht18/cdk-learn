@@ -6,6 +6,7 @@ import { S3DemoStack } from '../lib/s3-demo-stack';
 import { S3DeployStaticAppStack } from '../lib/push-file-stack';
 import { RdsDemoStack } from '../lib/rds-demo-stack';
 import { DynamodbDemoStack } from '../lib/dynamodb-demo-stack';
+import { TesseractOcrStack } from '../lib/ocr-stack';
 
 const env: cdk.Environment = {
   account: '512705736263',
@@ -18,3 +19,4 @@ new S3DemoStack(app, 'S3DemoStack', { env })
 new S3DeployStaticAppStack(app, 'S3DeployStaticAppStack', { env })
 new RdsDemoStack(app, 'RdsDemoStack', { env })
 new DynamodbDemoStack(app, 'DynamodbDemoStack', { env })
+new TesseractOcrStack(app, 'TesseractOcrStack', { env });

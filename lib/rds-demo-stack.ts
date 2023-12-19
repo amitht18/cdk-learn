@@ -1,5 +1,5 @@
 import { App, Stack, StackProps, RemovalPolicy, Duration, CfnOutput } from 'aws-cdk-lib';
-import { DatabaseInstance, DatabaseInstanceEngine, Credentials, PostgresEngineVersion } from 'aws-cdk-lib/aws-rds';
+import { DatabaseInstance, DatabaseInstanceEngine, Credentials } from 'aws-cdk-lib/aws-rds';
 import { Vpc, InstanceType, InstanceClass, SecurityGroup, InstanceSize, Peer, Port, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 
