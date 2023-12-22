@@ -1,0 +1,19 @@
+{
+  "name": "tesseract-ocr",
+  "version": "1.0.0",
+  "description": "Get text from image",
+  "main": "handler.js",
+  "scripts": {
+    "build": "esbuild --bundle src/index.ts --outfile=index.js --platform=node --platform=node",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Amith",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1524.0",
+    "tesseract.js": "^5.0.3"
+  },
+  "devDependencies": {
+    "esbuild": "0.19.10"
+  }
+}

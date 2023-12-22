@@ -10,38 +10,29 @@ export class TesseractOcrStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // S3 Bucket for image uploads
     const imageBucket = new s3.Bucket(this, 'ImageBucket', {
-      removalPolicy: RemovalPolicy.DESTROY, // Only for testing, adjust as needed
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    // SNS Topic for OCR completion notifications
     const ocrCompletionTopic = new sns.Topic(this, 'OCRCompletionTopic');
 
-    // Lambda function for Tesseract OCR
     const ocrLambda = new lambda.Function(this, 'OCRLambda', {
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'tesseract-impl.handler',
-      code: lambda.Code.fromAsset('./tesseract-ocr'), // Update this path
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('./tesseract-ocr'),
       environment: {
         BUCKET_NAME: imageBucket.bucketName,
         OCR_COMPLETION_TOPIC_ARN: ocrCompletionTopic.topicArn,
       },
     });
 
-    // Grant Lambda permissions to read from S3
     imageBucket.grantRead(ocrLambda);
-
-    // Grant Lambda permissions to publish to SNS topic
     ocrCompletionTopic.grantPublish(ocrLambda);
 
-    // Set up S3 trigger for Lambda function
     imageBucket.addEventNotification(
       s3.EventType.OBJECT_CREATED,
       new s3Notifications.LambdaDestination(ocrLambda)
     );
-
-    // Subscribe Lambda function to SNS topic
     ocrCompletionTopic.addSubscription(new snsSubscriptions.LambdaSubscription(ocrLambda));
   }
 }
