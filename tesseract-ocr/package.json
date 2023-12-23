@@ -4,7 +4,7 @@
   "description": "Get text from image",
   "main": "handler.js",
   "scripts": {
-    "build": "esbuild --bundle src/index.ts --outfile=index.js --platform=node --platform=node",
+    "build": "esbuild --bundle src/index.ts --outfile=index.js --platform=node --main-fields=module,main",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Amith",

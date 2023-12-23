@@ -1,5 +1,5 @@
 import S3 from 'aws-sdk/clients/s3';
-import Tesseract from 'tesseract.js';
+import { createWorker } from 'tesseract.js';
 
 const config = {
     lang: 'eng',
@@ -8,19 +8,17 @@ const config = {
 };
 
 export const tesseractHandler = async (event: any) => {
-    console.log("Amith event: ", event, event.Records[0].s3, event.Records[0].s3.object)
+    console.log('Amith event: ', event, event.Records[0].s3, event.Records[0].s3.object)
     const bucket = event.Records[0].s3.bucket.name;
     const imageKey = event.Records[0].s3.object.key;
     const image = await getImage(imageKey, bucket);
-    console.log("Amith image: ", image)
+    console.log('Amith image: ', image)
     const imageData = Buffer.from(image.Body as string, 'base64');
-    const sss = Tesseract.recognize(imageData, "eng", {
-        logger: (m) => console.log(m)
-    }).then(({ data: { text } }) => {
-        console.log("Amith text: ", text)
-        return text
-    })
-    console.log("Amith sss: ", await sss)
+    const worker = await createWorker('eng');
+    const sss = await worker.recognize(imageData)
+    console.log('Amith sss: ', sss.data.text)
+    await worker.terminate();
+    return sss.data.text
 }
 
 function getImage(imageKey: string, bucket: string) {

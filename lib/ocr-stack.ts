@@ -12,6 +12,7 @@ export class TesseractOcrStack extends Stack {
 
     const imageBucket = new s3.Bucket(this, 'ImageBucket', {
       removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
     });
 
     const ocrCompletionTopic = new sns.Topic(this, 'OCRCompletionTopic');
