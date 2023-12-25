@@ -12,7 +12,8 @@ export class S3DemoStack extends cdk.Stack {
             versioned: true,
             publicReadAccess: true,
             blockPublicAccess: S3.BlockPublicAccess.BLOCK_ACLS,
-            accessControl: S3.BucketAccessControl.BUCKET_OWNER_FULL_CONTROL
+            accessControl: S3.BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
+            autoDeleteObjects: true
         });
 
         const S3Policy = new iam.PolicyStatement({

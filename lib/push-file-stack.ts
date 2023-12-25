@@ -15,7 +15,8 @@ export class S3DeployStaticAppStack extends cdk.Stack {
             blockPublicAccess: S3.BlockPublicAccess.BLOCK_ACLS,
             accessControl: S3.BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
             websiteIndexDocument: 'index.html',
-            websiteErrorDocument: 'index.html'
+            websiteErrorDocument: 'index.html',
+            autoDeleteObjects: true
         });
 
         const S3Policy = new iam.PolicyStatement({
@@ -27,10 +28,12 @@ export class S3DeployStaticAppStack extends cdk.Stack {
         s3Bucket.addToResourcePolicy(S3Policy);
         s3Bucket.isWebsite
 
-        new s3deploy.BucketDeployment(this, 'DeployWebsite', {
+        const deployemnt = new s3deploy.BucketDeployment(this, 'DeployWebsite', {
             sources: [s3deploy.Source.asset('./static-site')],
             destinationBucket: s3Bucket
         })
+
+        deployemnt.node.addDependency(s3Bucket)
 
         new cdk.CfnOutput(this, 'WebsiteURL', {
             value: s3Bucket.bucketWebsiteUrl,
