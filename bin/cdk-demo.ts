@@ -8,15 +8,10 @@ import { RdsDemoStack } from '../lib/rds-demo-stack';
 import { DynamodbDemoStack } from '../lib/dynamodb-demo-stack';
 import { TesseractOcrStack } from '../lib/ocr-stack';
 
-const env: cdk.Environment = {
-  account: '512705736263',
-  region: 'us-east-1'
-}
-
 const app = new cdk.App();
-new CdkDemoStack(app, 'CdkDemoStack', { env });
-new S3DemoStack(app, 'S3DemoStack', { env })
-new S3DeployStaticAppStack(app, 'S3DeployStaticAppStack', { env })
-new RdsDemoStack(app, 'RdsDemoStack', { env })
-new DynamodbDemoStack(app, 'DynamodbDemoStack', { env })
-new TesseractOcrStack(app, 'TesseractOcrStack', { env });
+new CdkDemoStack(app, 'CdkDemoStack');
+new S3DemoStack(app, 'S3DemoStack')
+new S3DeployStaticAppStack(app, 'S3DeployStaticAppStack')
+new RdsDemoStack(app, 'RdsDemoStack')
+new DynamodbDemoStack(app, 'DynamodbDemoStack')
+new TesseractOcrStack(app, 'TesseractOcrStack');
