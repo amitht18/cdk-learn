@@ -1,10 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as iam from 'aws-cdk-lib/aws-iam';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as autoscaling from 'aws-cdk-lib/aws-autoscaling';
-import { InstanceTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 
 export class CdkDemoStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -70,5 +68,10 @@ export class CdkDemoStack extends cdk.Stack {
       }),
     })
     asg.attachToApplicationTargetGroup(targetGroup)
+    
+    new cdk.CfnOutput(this, 'VPCID', {
+      value: vpc.vpcId,
+      description: 'VPC ID',
+    })
   }
 }

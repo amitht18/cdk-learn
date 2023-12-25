@@ -22,5 +22,10 @@ export class S3DemoStack extends cdk.Stack {
             effect: iam.Effect.ALLOW
         });
         s3Bucket.addToResourcePolicy(S3Policy);
+
+        new cdk.CfnOutput(this, 'StaticWebsiteURL', {
+            value: s3Bucket.bucketWebsiteUrl,
+            exportName: 'StaticWebsiteURL',
+        })
     }
 }
