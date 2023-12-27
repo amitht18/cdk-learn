@@ -1,11 +1,11 @@
-import * as cdk from 'aws-cdk-lib';
+import { CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as autoscaling from 'aws-cdk-lib/aws-autoscaling';
 
-export class CdkDemoStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+export class CdkDemoStack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
     const vpc = new ec2.Vpc(this, 'ALBDemoVpc', {
       maxAzs: 2,
@@ -64,12 +64,12 @@ export class CdkDemoStack extends cdk.Stack {
       minCapacity: 2,
       desiredCapacity: 3,
       healthCheck: autoscaling.HealthCheck.elb({
-        grace: cdk.Duration.seconds(5),
+        grace: Duration.seconds(5),
       }),
     })
     asg.attachToApplicationTargetGroup(targetGroup)
     
-    new cdk.CfnOutput(this, 'VPCID', {
+    new CfnOutput(this, 'VPCID', {
       value: vpc.vpcId,
       description: 'VPC ID',
     })

@@ -1,43 +1,56 @@
-import * as cdk from 'aws-cdk-lib';
-import * as iam from 'aws-cdk-lib/aws-iam';
-import * as S3 from 'aws-cdk-lib/aws-s3';
-import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import { App, CfnOutput, Stack, StackProps, RemovalPolicy } from 'aws-cdk-lib';
+import { Bucket, BucketAccessControl, BlockPublicAccess } from 'aws-cdk-lib/aws-s3';
+import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
+import { CloudFrontWebDistribution, OriginAccessIdentity } from 'aws-cdk-lib/aws-cloudfront';
 
 
-export class S3DeployStaticAppStack extends cdk.Stack {
-    constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+export class S3DeployStaticAppStack extends Stack {
+    constructor(scope: App, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        const s3Bucket = new S3.Bucket(this, 'DemoBucketAmith', {
-            removalPolicy: cdk.RemovalPolicy.DESTROY,
+        const s3Bucket = new Bucket(this, 'S3StaticWebsiteBucket', {
+            removalPolicy: RemovalPolicy.DESTROY,
             versioned: true,
-            publicReadAccess: true,
-            blockPublicAccess: S3.BlockPublicAccess.BLOCK_ACLS,
-            accessControl: S3.BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
+            publicReadAccess: false,
+            blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+            accessControl: BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
             websiteIndexDocument: 'index.html',
             websiteErrorDocument: 'index.html',
-            autoDeleteObjects: true
+            autoDeleteObjects: true,
+            bucketName: 'amith-s3-static-website',
         });
 
-        const S3Policy = new iam.PolicyStatement({
-            principals: [new iam.AnyPrincipal()],
-            actions: ['s3:GetObject'],
-            resources: [s3Bucket.bucketArn + '/*'],
-            effect: iam.Effect.ALLOW
-        });
-        s3Bucket.addToResourcePolicy(S3Policy);
-        s3Bucket.isWebsite
-
-        const deployemnt = new s3deploy.BucketDeployment(this, 'DeployWebsite', {
-            sources: [s3deploy.Source.asset('./static-site')],
-            destinationBucket: s3Bucket
+        const deployment = new BucketDeployment(this, 'DeployWebsite', {
+            sources: [Source.asset('./static-site')],
+            destinationBucket: s3Bucket,
         })
 
-        deployemnt.node.addDependency(s3Bucket)
+        const originAccessIdentity = new OriginAccessIdentity(this, 'OriginAccessIdentity', {
+            comment: 'CDK Origin Access Identity',
+        })
+        s3Bucket.grantRead(originAccessIdentity)
 
-        new cdk.CfnOutput(this, 'WebsiteURL', {
-            value: s3Bucket.bucketWebsiteUrl,
-            exportName: 'WebsiteURL',
+        const cloudfrontDistribution = new CloudFrontWebDistribution(this, 'CloudFrontDistribution', {
+            originConfigs: [
+                {
+                    s3OriginSource: {
+                        s3BucketSource: s3Bucket,
+                        originAccessIdentity: originAccessIdentity
+                    },
+                    behaviors: [
+                        {
+                            isDefaultBehavior: true
+                        }
+                    ],
+                }
+            ],
+        })
+
+        deployment.node.addDependency(s3Bucket)
+
+        new CfnOutput(this, 'staticWebsiteCloudFrontURL', {
+            value: cloudfrontDistribution.distributionDomainName,
+            exportName: 'staticWebsiteCloudFrontURL',
         })
     }
 }
