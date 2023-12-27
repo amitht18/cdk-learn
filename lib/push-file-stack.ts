@@ -3,7 +3,6 @@ import { Bucket, BucketAccessControl, BlockPublicAccess } from 'aws-cdk-lib/aws-
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { CloudFrontWebDistribution, OriginAccessIdentity } from 'aws-cdk-lib/aws-cloudfront';
 
-
 export class S3DeployStaticAppStack extends Stack {
     constructor(scope: App, id: string, props?: StackProps) {
         super(scope, id, props);

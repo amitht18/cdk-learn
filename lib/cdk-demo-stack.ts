@@ -1,57 +1,69 @@
 import { CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import * as autoscaling from 'aws-cdk-lib/aws-autoscaling';
+import {
+  Vpc,
+  SubnetType,
+  SecurityGroup,
+  InstanceType,
+  InstanceClass,
+  InstanceSize,
+  Port,
+  Peer,
+  LaunchTemplate,
+  AmazonLinuxImage,
+  UserData
+} from 'aws-cdk-lib/aws-ec2';
+import { ApplicationLoadBalancer, ApplicationProtocol, ApplicationProtocolVersion, ApplicationTargetGroup, TargetType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { AutoScalingGroup, HealthCheck } from 'aws-cdk-lib/aws-autoscaling';
 
 export class CdkDemoStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
-    const vpc = new ec2.Vpc(this, 'ALBDemoVpc', {
+    const vpc = new Vpc(this, 'ALBDemoVpc', {
       maxAzs: 2,
       subnetConfiguration: [
         {
           cidrMask: 24,
           name: 'Public',
-          subnetType: ec2.SubnetType.PUBLIC
+          subnetType: SubnetType.PUBLIC
         }
       ]
     });
 
-    const sgForEC2 = new ec2.SecurityGroup(this, 'SGForEC2', {
+    const sgForEC2 = new SecurityGroup(this, 'SGForEC2', {
       vpc,
       description: 'Security Group for EC2',
     });
-    sgForEC2.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), 'SSH Access');
-    sgForEC2.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'HTTP Access');
-    sgForEC2.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.allTraffic());
+    sgForEC2.addIngressRule(Peer.anyIpv4(), Port.tcp(22), 'SSH Access');
+    sgForEC2.addIngressRule(Peer.anyIpv4(), Port.tcp(80), 'HTTP Access');
+    sgForEC2.addEgressRule(Peer.anyIpv4(), Port.allTraffic());
 
-    const ALB = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
+    const ALB = new ApplicationLoadBalancer(this, 'ALB', {
       vpc,
       internetFacing: true,
       securityGroup: sgForEC2,
       loadBalancerName: 'ALBDemo',
 
     });
-    const targetGroup = new elbv2.ApplicationTargetGroup(this, 'TargetGroup', {
+    const targetGroup = new ApplicationTargetGroup(this, 'TargetGroup', {
       vpc,
       port: 80,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      targetType: elbv2.TargetType.INSTANCE,
-      protocolVersion: elbv2.ApplicationProtocolVersion.HTTP1,
+      protocol: ApplicationProtocol.HTTP,
+      targetType: TargetType.INSTANCE,
+      protocolVersion: ApplicationProtocolVersion.HTTP1,
     });
     ALB.addListener('ALBListener', {
       port: 80,
       defaultTargetGroups: [targetGroup],
     })
 
-    const asg = new autoscaling.AutoScalingGroup(this, 'ASG', {
+    const asg = new AutoScalingGroup(this, 'ASG', {
       vpc,
-      launchTemplate: new ec2.LaunchTemplate(this, 'LaunchTemplate', {
-        instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
-        machineImage: new ec2.AmazonLinuxImage(),
+      launchTemplate: new LaunchTemplate(this, 'LaunchTemplate', {
+        instanceType: InstanceType.of(InstanceClass.T2, InstanceSize.MICRO),
+        machineImage: new AmazonLinuxImage(),
         securityGroup: sgForEC2,
-        userData: ec2.UserData.custom(`
+        userData: UserData.custom(`
           #!/bin/bash
           yum update -y
           yum install httpd -y
@@ -63,7 +75,7 @@ export class CdkDemoStack extends Stack {
       maxCapacity: 4,
       minCapacity: 2,
       desiredCapacity: 3,
-      healthCheck: autoscaling.HealthCheck.elb({
+      healthCheck: HealthCheck.elb({
         grace: Duration.seconds(5),
       }),
     })
