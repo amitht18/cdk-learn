@@ -55,7 +55,7 @@ export class CdkDemoStack extends Stack {
     ALB.addListener('ALBListener', {
       port: 80,
       defaultTargetGroups: [targetGroup],
-    })
+    });
 
     const asg = new AutoScalingGroup(this, 'ASG', {
       vpc,
@@ -78,12 +78,12 @@ export class CdkDemoStack extends Stack {
       healthCheck: HealthCheck.elb({
         grace: Duration.seconds(5),
       }),
-    })
-    asg.attachToApplicationTargetGroup(targetGroup)
+    });
+    asg.attachToApplicationTargetGroup(targetGroup);
     
     new CfnOutput(this, 'VPCID', {
       value: vpc.vpcId,
       description: 'VPC ID',
-    })
+    });
   }
 }
