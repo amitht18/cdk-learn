@@ -13,11 +13,11 @@ export class DynamodbDemoStack extends Stack {
             },
             tableClass: TableClass.STANDARD,
             removalPolicy: RemovalPolicy.DESTROY
-        })
+        });
 
         new CfnOutput(this, 'DynamoDBDemoArn', {
             value: dynamoDBDemo.tableArn,
             exportName: 'DynamoDBDemoArn'
-        })
+        });
     }
 }
