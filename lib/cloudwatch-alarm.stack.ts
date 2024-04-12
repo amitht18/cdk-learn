@@ -1,6 +1,6 @@
 import { Stack, App, StackProps, Duration, CfnOutput } from "aws-cdk-lib";
 import { Metric } from "aws-cdk-lib/aws-cloudwatch";
-import { Ec2InstanceAction } from "aws-cdk-lib/aws-cloudwatch-actions";
+import { Ec2Action, Ec2InstanceAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import { AmazonLinuxImage, Instance, InstanceClass, InstanceSize, InstanceType, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
 
 export class CloudwatchAlarmStack extends Stack {
@@ -16,7 +16,7 @@ export class CloudwatchAlarmStack extends Stack {
                 Currency: 'USD'
             }
         });
-
+        
         billingMetric.createAlarm(this, 'BillingAlarm', {
             threshold: 0,
             evaluationPeriods: 1,
@@ -56,6 +56,8 @@ export class CloudwatchAlarmStack extends Stack {
         })
 
         // find way to attach Alarm to instance
+
+        ec2Alarmed.addAlarmAction(new Ec2Action(Ec2InstanceAction.RECOVER));
 
         new CfnOutput(this, 'BillingAlarmArn', {
             value: billingMetric.metricName,
