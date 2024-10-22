@@ -9,6 +9,7 @@ import { DynamodbDemoStack } from '../lib/dynamodb-demo-stack';
 import { TesseractOcrStack } from '../lib/ocr-stack';
 import { NotifyImageUploadStack } from '../lib/notify-image-upload.stack';
 import { CloudwatchAlarmStack } from '../lib/cloudwatch-alarm.stack';
+import { APIKeyWithLambdaTestStack } from '../lib/test-API-Key/api-key-test-lambda.stack';
 
 const app = new cdk.App();
 new CdkDemoStack(app, 'CdkDemoStack');
@@ -19,3 +20,4 @@ new DynamodbDemoStack(app, 'DynamodbDemoStack');
 new TesseractOcrStack(app, 'TesseractOcrStack');
 new NotifyImageUploadStack(app, 'NotifyImageUploadStack');
 new CloudwatchAlarmStack(app, 'CloudwatchAlarmStack');
+new APIKeyWithLambdaTestStack(app, 'APIKeyWithLambdaTestStack');
